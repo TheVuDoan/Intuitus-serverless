@@ -1,0 +1,38 @@
+service: intuitus-serverless
+
+frameworkVersion: '4'
+
+plugins:
+  - serverless-ruby-layer
+
+custom:
+  rubyLayer:
+    use_docker: true
+    docker_file: Dockerfile
+    native_libs:
+      - /usr/lib64/libpq.so.5
+      - /usr/lib64/libldap_r-2.4.so.2
+      - /usr/lib64/liblber-2.4.so.2
+      - /usr/lib64/libsasl2.so.3
+      - /usr/lib64/libssl3.so
+      - /usr/lib64/libsmime3.so
+      - /usr/lib64/libnss3.so
+
+provider:
+  name: aws
+  stage: prod
+  runtime: ruby3.2
+  region: us-east-1
+  profile: thevudoan
+  memorySize: 128
+  timeout: 300
+  environment: ${file(./.environment/${self:provider.stage}.env.json)}
+
+functions:
+  webhook:
+    handler: handler.webhook
+    url:
+      cors:
+        allowedMethods:
+          - POST
+        maxAge: 600
